@@ -4,3 +4,4 @@ Flask-Session
 Authlib
 requests
 python-dotenv
+google-generativeai
