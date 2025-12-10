@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Leads Pipeline</h2>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addLeadModal">Add Lead</button>
+</div>
+<div class="card shadow-sm"><div class="card-body"><div class="table-responsive">
+    <table class="table table-hover align-middle">
+    <thead class="table-light">
+        <tr>
+            <th>Name</th>
+            <th>Company</th>
+            <th>Source</th> <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for lead in leads %}
+        <tr>
+            <td>
+                <div class="fw-bold">{{ lead.name }}</div>
+                <div class="text-muted small">{{ lead.email }}</div>
+            </td>
+            <td>{{ lead.company }}</td>
+            <td>
+                <span class="badge bg-light text-dark border">{{ lead.source }}</span>
+            </td>
+            <td>
+                <form action="{{ url_for('update_lead_status', lead_id=lead._id) }}" method="POST" class="d-flex">
+                    <select name="status" class="form-select form-select-sm" onchange="this.form.submit()" 
+                            style="width: 110px; font-size: 0.85rem; font-weight: 500;
+                            {% if lead.status == 'Hot' %}
+                                background-color: #d1e7dd; color: #0f5132; border-color: #badbcc;
+                            {% elif lead.status == 'Warm' %}
+                                background-color: #fff3cd; color: #664d03; border-color: #ffecb5;
+                            {% else %}
+                                background-color: #e2e3e5; color: #41464b; border-color: #d3d6d8;
+                            {% endif %}">
+                        <option value="Cold" {% if lead.status == 'Cold' %}selected{% endif %}>❄️ Cold</option>
+                        <option value="Warm" {% if lead.status == 'Warm' %}selected{% endif %}>🔥 Warm</option>
+                        <option value="Hot" {% if lead.status == 'Hot' %}selected{% endif %}>🚀 Hot</option>
+                    </select>
+                </form>
+            </td>
+            <td>
+                <a href="{{ url_for('convert_lead', lead_id=lead._id) }}" class="btn btn-sm btn-success me-1" title="Convert to Prospect" onclick="return confirm('Promote this lead to a Prospect?')">
+                    <i class="bi bi-arrow-right-circle"></i> Convert
+                </a>
+                <a href="{{ url_for('delete_lead', lead_id=lead._id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this lead?')">
+                    <i class="bi bi-trash"></i>
+                </a>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="5" class="text-center py-4 text-muted">
+                No active leads. Click "Add Lead" to start.
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div></div></div>
+<div class="modal fade" id="addLeadModal"><div class="modal-dialog"><div class="modal-content">
+    <form action="{{ url_for('leads') }}" method="POST">
+        <div class="modal-header"><h5 class="modal-title">New Lead</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+            <input type="text" name="name" class="form-control mb-3" placeholder="Full Name" required>
+            <input type="text" name="company" class="form-control mb-3" placeholder="Company" required>
+            <input type="email" name="email" class="form-control mb-3" placeholder="Email">
+            <select name="source" class="form-select"><option>LinkedIn</option><option>Referral</option><option>Website</option></select>
+        </div>
+        <div class="modal-footer"><button type="submit" class="btn btn-primary">Save</button></div>
+    </form>
+</div></div></div>
+{% endblock %}

@@ -1,0 +1,6 @@
+Flask
+Flask-PyMongo
+Flask-Session
+Authlib
+requests
+python-dotenv

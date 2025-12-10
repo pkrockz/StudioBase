@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Invoices</h2>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addInvoiceModal">Create Invoice</button>
+</div>
+
+<div class="card shadow-sm"><div class="card-body"><div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead class="table-light"><tr><th>Invoice #</th><th>Client</th><th>Due</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody>
+            {% for inv in invoices %}
+            <tr>
+                <td>{{ inv.invoice_number }}</td>
+                <td>{{ inv.client_name }}<br><small class="text-muted">{{ inv.project_title }}</small></td>
+                <td>{{ inv.due_date | date_format }}</td>
+                <td>${{ inv.amount }}</td>
+                <td><span class="badge {% if inv.status == 'Paid' %}bg-success{% else %}bg-danger{% endif %}">{{ inv.status }}</span></td>
+                <td>
+                    <a href="{{ url_for('view_invoice', invoice_id=inv._id) }}" target="_blank" class="btn btn-sm btn-outline-primary">View</a>
+                    {% if inv.status != 'Paid' %}
+                    <a href="{{ url_for('mark_invoice_paid', invoice_id=inv._id) }}" class="btn btn-sm btn-success">Pay</a>
+                    {% endif %}
+                    <a href="{{ url_for('delete_invoice', invoice_id=inv._id) }}" class="btn btn-sm btn-outline-danger">Del</a>
+                </td>
+            </tr>
+            {% else %}<tr><td colspan="6" class="text-center py-4">No invoices.</td></tr>{% endfor %}
+        </tbody>
+    </table>
+</div></div></div>
+
+<div class="modal fade" id="addInvoiceModal"><div class="modal-dialog"><div class="modal-content">
+    <form action="{{ url_for('invoices') }}" method="POST">
+        <div class="modal-header"><h5 class="modal-title">New Invoice</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+            <label class="form-label small text-muted">Client</label>
+            <select name="client_name" class="form-select mb-3" required>
+                {% for c in clients %}<option value="{{ c.name }}">{{ c.name }}</option>{% endfor %}
+                <option value="Manual">Manual Client</option>
+            </select>
+            
+            <label class="form-label small text-muted">Project</label>
+            <select name="project_title" class="form-select mb-3" required>
+                {% for p in projects %}<option value="{{ p.title }}">{{ p.title }}</option>{% endfor %}
+                <option value="General Service">General Service</option>
+            </select>
+            
+            <input type="number" step="0.01" name="amount" class="form-control mb-3" placeholder="Amount ($)" required>
+            
+            <label class="form-label small text-muted">Due Date</label>
+            <input type="date" name="due_date" class="form-control mb-3" required>
+        </div>
+        <div class="modal-footer"><button type="submit" class="btn btn-primary">Generate</button></div>
+    </form>
+</div></div></div>
+
+{% if request.args.get('prefill_project') %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // 1. Initialize and Show the Modal
+        var invoiceModalElement = document.getElementById('addInvoiceModal');
+        var invoiceModal = new bootstrap.Modal(invoiceModalElement);
+        invoiceModal.show();
+        
+        // 2. Pre-select Client
+        var clientSelect = document.querySelector('select[name="client_name"]');
+        if(clientSelect) {
+            clientSelect.value = "{{ request.args.get('prefill_client') }}";
+        }
+        
+        // 3. Pre-select Project
+        var projectSelect = document.querySelector('select[name="project_title"]');
+        if(projectSelect) {
+            projectSelect.value = "{{ request.args.get('prefill_project') }}";
+        }
+    });
+</script>
+{% endif %}
+
+{% endblock %}

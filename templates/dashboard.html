@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+    <h2 class="h4 mb-4">Command Deck</h2>
+    
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary h-100 shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title opacity-75">Active Projects</h6>
+                    <h2 class="fw-bold">{{ active_projects_count }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success h-100 shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title opacity-75">Pipeline Value</h6>
+                    <h2 class="fw-bold">${{ pipeline_total }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning h-100 shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title text-dark opacity-75">Pending Tasks</h6>
+                    <h2 class="fw-bold text-dark">{{ pending_tasks_count }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-danger h-100 shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title opacity-75">Overdue Invoices</h6>
+                    <h2 class="fw-bold">{{ overdue_count }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-white"><h6 class="mb-0 fw-bold text-danger">Needs Attention (Cold Leads)</h6></div>
+                <ul class="list-group list-group-flush">
+                    {% for lead in urgent_leads %}
+                    <li class="list-group-item d-flex justify-content-between">
+                        <div><strong>{{ lead.name }}</strong> <small class="text-muted">({{ lead.company }})</small></div>
+                        <a href="{{ url_for('leads') }}" class="btn btn-sm btn-outline-primary">View</a>
+                    </li>
+                    {% else %}
+                    <li class="list-group-item text-center text-muted">All clear!</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-white"><h6 class="mb-0 fw-bold text-primary">Active Projects Progress</h6></div>
+                <div class="card-body">
+                    {% for project in active_projects %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <a href="{{ url_for('project_detail', project_id=project._id) }}" class="text-decoration-none text-dark fw-bold">
+                                {{ project.title }}
+                            </a>
+                            <small class="text-muted" style="font-size: 0.8rem;">
+                                {{ project.tasks_done }}/{{ project.tasks_total }} tasks
+                            </small>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar 
+                                {% if project.progress == 100 %}bg-success
+                                {% elif project.progress > 50 %}bg-primary
+                                {% else %}bg-warning{% endif %}" 
+                                role="progressbar" 
+                                style="width: {{ project.progress }}%">
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="text-center text-muted py-3">No active projects.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

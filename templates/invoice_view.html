@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #555; padding: 20px; }
+        .invoice-paper { background: white; max-width: 800px; margin: 0 auto; padding: 40px; min-height: 1000px; }
+        @media print { body { background: white; padding: 0; } .no-print { display: none; } }
+    </style>
+</head>
+<body>
+    <div class="text-center mb-3 no-print"><button onclick="window.print()" class="btn btn-light">🖨️ Print</button></div>
+    <div class="invoice-paper">
+        <div class="d-flex justify-content-between border-bottom pb-4 mb-4">
+            <h1>INVOICE</h1>
+            <div class="text-end"><h4>StudioBase</h4><p class="text-muted">{{ user.email }}</p></div>
+        </div>
+        <div class="row mb-5">
+            <div class="col-6"><h6>Bill To</h6><h4>{{ invoice.client_name }}</h4><p>{{ invoice.project_title }}</p></div>
+            <div class="col-6 text-end">
+                <p><strong>Issued:</strong> {{ invoice.created_at | date_format }}</p>
+                <p><strong>Due:</strong> {{ invoice.due_date | date_format }}</p>
+                <span class="badge {% if invoice.status == 'Paid' %}bg-success{% else %}bg-danger{% endif %} fs-6">{{ invoice.status }}</span>
+            </div>
+        </div>
+        <table class="table table-bordered mb-4">
+            <thead class="table-light"><tr><th>Description</th><th class="text-end">Amount</th></tr></thead>
+            <tbody>
+                <tr><td class="py-3"><strong>{{ invoice.project_title }}</strong></td><td class="text-end py-3">${{ invoice.amount }}</td></tr>
+            </tbody>
+            <tfoot class="table-light"><tr><th class="text-end">Total</th><th class="text-end">${{ invoice.amount }}</th></tr></tfoot>
+        </table>
+    </div>
+</body>
+</html>
