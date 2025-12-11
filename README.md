@@ -244,7 +244,7 @@ StudioBase/
 
 ### Production Considerations
 
-1. **Set Debug to False**: Change `app.run(debug=False)` in production
+1. **Set Debug to False**: Change `app.run(debug=True)` to `app.run(debug=False)` in app.py for production
 2. **Use Production Server**: Deploy with Gunicorn or uWSGI instead of Flask development server
 3. **Enable HTTPS**: Use SSL certificates for secure connections
 4. **Update OAuth Callbacks**: Configure production URLs in OAuth apps
