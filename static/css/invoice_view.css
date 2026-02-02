@@ -1,0 +1,6 @@
+body { background: #555; padding: 20px; }
+.invoice-paper { background: white; max-width: 800px; margin: 0 auto; padding: 40px; min-height: 1000px; }
+@media print {
+    body { background: white; padding: 0; }
+    .no-print { display: none; }
+}

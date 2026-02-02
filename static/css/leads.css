@@ -1,0 +1,48 @@
+/* static/css/leads.css */
+
+/* --- Card Table Wrapper --- */
+.card {
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden; /* Clips the table corners */
+}
+
+/* --- Table Headers --- */
+.table thead th {
+    background-color: #f8fafc; /* Slate 50 */
+    color: #64748b;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem 1.5rem;
+}
+
+/* --- Table Body --- */
+.table tbody td {
+    padding: 1rem 1.5rem;
+    vertical-align: middle;
+    color: var(--text-main);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f8fafc; /* Subtle hover */
+}
+
+/* --- Status Pills (Subtle Style) --- */
+.status-select {
+    border: 1px solid var(--border-color);
+    background-color: #fff;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    padding: 0.35rem 1rem;
+    font-weight: 500;
+    color: var(--text-main);
+    box-shadow: var(--shadow-sm);
+}
+
+.status-hot { background: #ecfdf5; color: #059669; border-color: #a7f3d0; }
+.status-warm { background: #fffbeb; color: #d97706; border-color: #fde68a; }
+.status-cold { background: #f1f5f9; color: #64748b; border-color: #e2e8f0; }

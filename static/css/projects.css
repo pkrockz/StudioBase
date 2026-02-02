@@ -1,0 +1,46 @@
+/* static/css/projects.css */
+
+.project-card {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-sm);
+}
+
+.project-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg); /* Deep shadow on lift */
+    border-color: #cbd5e1;
+}
+
+.project-title {
+    font-weight: 700;
+    color: var(--text-main);
+    font-size: 1.1rem;
+}
+
+.project-desc {
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+.client-tag {
+    background-color: #f8fafc;
+    border-top: 1px solid var(--border-color);
+    color: #64748b;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* Badges */
+.badge-status {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+.status-active { background: #eff6ff; color: #2563eb; } /* Blue tint */
+.status-planning { background: #f5f3ff; color: #7c3aed; } /* Purple tint */
+.status-completed { background: #f0fdf4; color: #059669; } /* Green tint */

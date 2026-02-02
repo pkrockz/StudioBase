@@ -1,0 +1,98 @@
+/* static/css/prospects.css */
+
+/* --- Stage Select "Pill" Styling --- */
+.stage-select {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    
+    /* Keep the padding to clear the arrow */
+    padding: 0.35rem 2.2rem 0.35rem 1rem;
+    
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    
+    /* FIX: Changed from 100% to fixed width so it doesn't stretch */
+    width: 175px; 
+    
+    transition: all 0.2s ease;
+    background-color: #fff;
+    color: var(--text-main);
+    box-shadow: var(--shadow-sm);
+    
+    /* Custom Arrow */
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 10px 8px;
+    
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.stage-select:hover {
+    box-shadow: var(--shadow-md);
+    border-color: #cbd5e1;
+}
+
+.stage-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+/* --- "Invisible" Value Input --- */
+.input-value-wrapper {
+    position: relative;
+    width: 120px;
+}
+
+.input-value {
+    border: 1px solid transparent;
+    background: transparent;
+    font-weight: 600;
+    color: var(--text-main);
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    transition: all 0.2s;
+    width: 100%;
+}
+
+.input-value:hover, .input-value:focus {
+    background-color: #fff;
+    border-color: var(--border-color);
+    box-shadow: var(--shadow-sm);
+}
+
+/* --- Probability Progress Bar --- */
+.prob-container {
+    width: 100%;
+    background-color: #f1f5f9; /* Slate 100 */
+    border-radius: 100px;
+    height: 6px;
+    overflow: hidden;
+}
+
+.prob-bar {
+    height: 100%;
+    border-radius: 100px;
+    transition: width 0.6s ease;
+}
+
+/* --- Action Buttons --- */
+.btn-win {
+    color: #059669;
+    background-color: #ecfdf5; /* Emerald 50 */
+    border: 1px solid transparent;
+    transition: all 0.2s;
+}
+
+.btn-win:hover {
+    background-color: #d1fae5;
+    border-color: #a7f3d0;
+    color: #047857;
+}

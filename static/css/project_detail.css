@@ -1,0 +1,64 @@
+/* static/css/project_detail.css */
+
+/* --- Header Section --- */
+.project-header {
+    background: #fff;
+    padding: 2rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 2rem;
+}
+
+/* --- Task List Styling --- */
+.task-card {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: #fff;
+    box-shadow: var(--shadow-sm);
+}
+
+.table-tasks { margin-bottom: 0; }
+
+.table-tasks th {
+    background-color: #f8fafc;
+    color: #64748b;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table-tasks td {
+    padding: 1rem 1.5rem;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-main);
+}
+
+.table-tasks tr:last-child td { border-bottom: none; }
+.table-tasks tr:hover td { background-color: #f8fafc; }
+
+/* --- Task Toggle --- */
+.task-toggle {
+    font-size: 1.25rem;
+    color: #cbd5e1; /* Inactive Grey */
+    transition: all 0.2s ease;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.task-toggle:hover {
+    color: var(--primary-color);
+    transform: scale(1.1);
+}
+
+.task-toggle.completed { color: #10b981; } /* Success Green */
+
+.task-desc.completed {
+    text-decoration: line-through;
+    color: #94a3b8;
+}
