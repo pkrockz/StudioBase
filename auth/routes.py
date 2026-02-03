@@ -13,7 +13,7 @@ google = oauth.google
 @auth_bp.route("/")
 def index():
     if "user_id" in session:
-        return redirect(url_for("dashboard"))
+        return redirect(url_for("dashboard.dashboard"))
     return render_template("login.html")
 
 
@@ -82,7 +82,7 @@ def handle_login(data):
     session["username"] = data["username"]
     session["avatar"] = data["avatar_url"]
 
-    return redirect(url_for("dashboard"))
+    return redirect(url_for("dashboard.dashboard"))
 
 
 @auth_bp.route("/logout")
