@@ -12,6 +12,7 @@ load_dotenv()
 from config import Config
 from extensions import mongo, oauth
 
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
@@ -55,84 +56,15 @@ def create_app():
         client_kwargs={'scope': 'openid email profile'}
     )
 
-    # ---------------- ROUTES (UNCHANGED) ----------------
+    # --- ROUTES ---
+    from auth import auth_bp
+    app.register_blueprint(auth_bp)
 
-    @app.route('/')
-    def index():
-        if 'user_id' in session:
-            return redirect(url_for('dashboard'))
-        return render_template('login.html')
-
-    @app.route('/login/github')
-    def login_github():
-        redirect_uri = url_for('authorize_github', _external=True)
-        return github.authorize_redirect(redirect_uri)
-
-    @app.route('/login/google')
-    def login_google():
-        redirect_uri = url_for('authorize_google', _external=True)
-        return google.authorize_redirect(redirect_uri)
-
-    @app.route('/authorize/github')
-    def authorize_github():
-        token = github.authorize_access_token()
-        resp = github.get('user', token=token)
-        user_info = resp.json()
-        user_data = {
-            "oauth_id": str(user_info['id']),
-            "provider": "github",
-            "username": user_info['login'],
-            "email": user_info.get('email'),
-            "avatar_url": user_info['avatar_url']
-        }
-        return handle_login(user_data)
-
-    @app.route('/authorize/google')
-    def authorize_google():
-        token = google.authorize_access_token()
-        user_info = token.get('userinfo')
-        user_data = {
-            "oauth_id": user_info['sub'],
-            "provider": "google",
-            "username": user_info.get('name'),
-            "email": user_info.get('email'),
-            "avatar_url": user_info.get('picture')
-        }
-        return handle_login(user_data)
-
-    def handle_login(data):
-        users = mongo.db.users
-        existing_user = None
-
-        if data.get('email'):
-            existing_user = users.find_one({"email": data['email']})
-        if not existing_user:
-            existing_user = users.find_one({
-                "oauth_id": data['oauth_id'],
-                "provider": data['provider']
-            })
-
-        if not existing_user:
-            new_user_id = users.insert_one(data).inserted_id
-            session['user_id'] = str(new_user_id)
-        else:
-            users.update_one({'_id': existing_user['_id']}, {"$set": data})
-            session['user_id'] = str(existing_user['_id'])
-
-        session['username'] = data['username']
-        session['avatar'] = data['avatar_url']
-        return redirect(url_for('dashboard'))
-
-    @app.route('/logout')
-    def logout():
-        session.clear()
-        return redirect(url_for('index'))
-
-# --- DASHBOARD ---
+    # --- DASHBOARD ---
 
     @app.route('/dashboard')
     def dashboard():
-        if 'user_id' not in session: return redirect(url_for('index'))
+        if 'user_id' not in session: return redirect(url_for('auth.index'))
         user_id = session['user_id']
         today_str = datetime.utcnow().strftime('%Y-%m-%d')
 
@@ -200,7 +132,7 @@ def create_app():
 
     @app.route('/leads', methods=['GET', 'POST'])
     def leads():
-        if 'user_id' not in session: return redirect(url_for('index'))
+        if 'user_id' not in session: return redirect(url_for('auth.index'))
         
         if request.method == 'POST':
             # Add New Lead
@@ -223,7 +155,7 @@ def create_app():
 
     @app.route('/leads/update_status/<lead_id>', methods=['POST'])
     def update_lead_status(lead_id):
-        if 'user_id' not in session: return redirect(url_for('index'))
+        if 'user_id' not in session: return redirect(url_for('auth.index'))
         
         new_status = request.form.get('status')
         mongo.db.leads.update_one(
@@ -234,7 +166,7 @@ def create_app():
 
     @app.route('/convert_lead/<lead_id>')
     def convert_lead(lead_id):
-        if 'user_id' not in session: return redirect(url_for('index'))
+        if 'user_id' not in session: return redirect(url_for('auth.index'))
         
         lead = mongo.db.leads.find_one({"_id": ObjectId(lead_id), "user_id": session['user_id']})
         
@@ -258,7 +190,7 @@ def create_app():
 
     @app.route('/leads/delete/<lead_id>')
     def delete_lead(lead_id):
-        if 'user_id' not in session: return redirect(url_for('index'))
+        if 'user_id' not in session: return redirect(url_for('auth.index'))
         mongo.db.leads.delete_one({"_id": ObjectId(lead_id), "user_id": session['user_id']})
         return redirect(url_for('leads'))
 
@@ -266,7 +198,7 @@ def create_app():
 
     @app.route('/prospects', methods=['GET', 'POST'])
     def prospects():
-        if 'user_id' not in session: return redirect(url_for('index'))
+        if 'user_id' not in session: return redirect(url_for('auth.index'))
         
         if request.method == 'POST':
             mongo.db.prospects.insert_one({
@@ -286,7 +218,7 @@ def create_app():
 
     @app.route('/prospects/update_stage/<prospect_id>', methods=['POST'])
     def update_prospect_stage(prospect_id):
-        if 'user_id' not in session: return redirect(url_for('index'))
+        if 'user_id' not in session: return redirect(url_for('auth.index'))
         
         new_stage = request.form.get('stage')
         
@@ -304,7 +236,7 @@ def create_app():
 
     @app.route('/prospects/update_value/<prospect_id>', methods=['POST'])
     def update_prospect_value(prospect_id):
-        if 'user_id' not in session: return redirect(url_for('index'))
+        if 'user_id' not in session: return redirect(url_for('auth.index'))
         
         new_value = float(request.form.get('value', 0))
         
@@ -316,7 +248,7 @@ def create_app():
 
     @app.route('/convert_prospect/<prospect_id>')
     def convert_prospect(prospect_id):
-        if 'user_id' not in session: return redirect(url_for('index'))
+        if 'user_id' not in session: return redirect(url_for('auth.index'))
         
         # 1. Get the Prospect Data
         prospect = mongo.db.prospects.find_one({"_id": ObjectId(prospect_id), "user_id": session['user_id']})
@@ -346,7 +278,7 @@ def create_app():
 
     @app.route('/prospects/delete/<prospect_id>')
     def delete_prospect(prospect_id):
-        if 'user_id' not in session: return redirect(url_for('index'))
+        if 'user_id' not in session: return redirect(url_for('auth.index'))
         mongo.db.prospects.delete_one({"_id": ObjectId(prospect_id), "user_id": session['user_id']})
         return redirect(url_for('prospects'))
 
@@ -354,7 +286,7 @@ def create_app():
 
     @app.route('/clients', methods=['GET', 'POST'])
     def clients():
-        if 'user_id' not in session: return redirect(url_for('index'))
+        if 'user_id' not in session: return redirect(url_for('auth.index'))
         
         if request.method == 'POST':
             mongo.db.clients.insert_one({
@@ -374,7 +306,7 @@ def create_app():
 
     @app.route('/clients/delete/<client_id>')
     def delete_client(client_id):
-        if 'user_id' not in session: return redirect(url_for('index'))
+        if 'user_id' not in session: return redirect(url_for('auth.index'))
         
         # 1. Identify the Client
         client = mongo.db.clients.find_one({"_id": ObjectId(client_id), "user_id": session['user_id']})
@@ -418,7 +350,7 @@ def create_app():
 
     @app.route('/projects', methods=['GET', 'POST'])
     def projects():
-        if 'user_id' not in session: return redirect(url_for('index'))
+        if 'user_id' not in session: return redirect(url_for('auth.index'))
         
         if request.method == 'POST':
             client_id = request.form.get('client_id')
@@ -483,7 +415,7 @@ def create_app():
 
     @app.route('/project/<project_id>')
     def project_detail(project_id):
-        if 'user_id' not in session: return redirect(url_for('index'))
+        if 'user_id' not in session: return redirect(url_for('auth.index'))
         project = mongo.db.projects.find_one({"_id": ObjectId(project_id)})
         # Sort tasks so "Pending" appear first, then "Done"
         tasks = mongo.db.tasks.find({"project_id": ObjectId(project_id)}).sort("status", -1)
@@ -491,7 +423,7 @@ def create_app():
 
     @app.route('/projects/delete/<project_id>')
     def delete_project(project_id):
-        if 'user_id' not in session: return redirect(url_for('index'))
+        if 'user_id' not in session: return redirect(url_for('auth.index'))
         
         # FIX: Cascade Delete - Delete tasks first, then the project
         mongo.db.tasks.delete_many({"project_id": ObjectId(project_id)})
@@ -501,7 +433,7 @@ def create_app():
 
     @app.route('/project/<project_id>/add_task', methods=['POST'])
     def add_task(project_id):
-        if 'user_id' not in session: return redirect(url_for('index'))
+        if 'user_id' not in session: return redirect(url_for('auth.index'))
         
         mongo.db.tasks.insert_one({
             "user_id": session['user_id'],
@@ -514,7 +446,7 @@ def create_app():
 
     @app.route('/task/<task_id>/edit', methods=['POST'])
     def edit_task(task_id):
-        if 'user_id' not in session: return redirect(url_for('index'))
+        if 'user_id' not in session: return redirect(url_for('auth.index'))
         
         mongo.db.tasks.update_one(
             {"_id": ObjectId(task_id)},
@@ -529,7 +461,7 @@ def create_app():
 
     @app.route('/task/<task_id>/toggle')
     def toggle_task(task_id):
-        if 'user_id' not in session: return redirect(url_for('index'))
+        if 'user_id' not in session: return redirect(url_for('auth.index'))
         
         task = mongo.db.tasks.find_one({"_id": ObjectId(task_id)})
         new_status = "Done" if task['status'] == "Pending" else "Pending"
@@ -542,7 +474,7 @@ def create_app():
 
     @app.route('/project/<project_id>/complete')
     def complete_project(project_id):
-        if 'user_id' not in session: return redirect(url_for('index'))
+        if 'user_id' not in session: return redirect(url_for('auth.index'))
         
         # 1. Update Project Status
         project = mongo.db.projects.find_one({"_id": ObjectId(project_id)})
@@ -559,7 +491,7 @@ def create_app():
 
     @app.route('/task/<task_id>/delete')
     def delete_task(task_id):
-        if 'user_id' not in session: return redirect(url_for('index'))
+        if 'user_id' not in session: return redirect(url_for('auth.index'))
         
         task = mongo.db.tasks.find_one({"_id": ObjectId(task_id)})
         project_id = task['project_id']
@@ -572,7 +504,7 @@ def create_app():
     @app.route('/invoices', methods=['GET', 'POST'])
     def invoices():
         # ... [Keep existing invoice creation logic] ...
-        if 'user_id' not in session: return redirect(url_for('index'))
+        if 'user_id' not in session: return redirect(url_for('auth.index'))
         if request.method == 'POST':
             inv_number = f"INV-{datetime.utcnow().strftime('%Y%m%d')}-{str(ObjectId())[-4:]}"
             mongo.db.invoices.insert_one({
@@ -594,7 +526,7 @@ def create_app():
 
     @app.route('/invoice/<invoice_id>/pay')
     def mark_invoice_paid(invoice_id):
-        if 'user_id' not in session: return redirect(url_for('index'))
+        if 'user_id' not in session: return redirect(url_for('auth.index'))
         
         # 1. Mark this invoice as Paid
         mongo.db.invoices.update_one(
@@ -626,14 +558,14 @@ def create_app():
 
     @app.route('/invoice/<invoice_id>/view')
     def view_invoice(invoice_id):
-        if 'user_id' not in session: return redirect(url_for('index'))
+        if 'user_id' not in session: return redirect(url_for('auth.index'))
         invoice = mongo.db.invoices.find_one({"_id": ObjectId(invoice_id)})
         user = mongo.db.users.find_one({"_id": ObjectId(session['user_id'])})
         return render_template('invoice_view.html', invoice=invoice, user=user)
 
     @app.route('/invoices/delete/<invoice_id>')
     def delete_invoice(invoice_id):
-        if 'user_id' not in session: return redirect(url_for('index'))
+        if 'user_id' not in session: return redirect(url_for('auth.index'))
         mongo.db.invoices.delete_one({"_id": ObjectId(invoice_id), "user_id": session['user_id']})
         return redirect(url_for('invoices'))
     
