@@ -26,8 +26,8 @@
                 <span class="badge bg-light text-dark border">{{ lead.source }}</span>
             </td>
             <td>
-                <form action="{{ url_for('update_lead_status', lead_id=lead._id) }}" method="POST" class="d-flex">
-                    <select name="status" class="form-select form-select-sm" onchange="this.form.submit()" 
+                <form action="{{ url_for('leads.update_lead_status', lead_id=lead._id) }}" method="POST" class="d-flex">
+                            <select name="status" class="form-select form-select-sm" onchange="this.form.submit()" 
                             style="width: 110px; font-size: 0.85rem; font-weight: 500;
                             {% if lead.status == 'Hot' %}
                                 background-color: #d1e7dd; color: #0f5132; border-color: #badbcc;
@@ -43,10 +43,10 @@
                 </form>
             </td>
             <td>
-                <a href="{{ url_for('convert_lead', lead_id=lead._id) }}" class="btn btn-sm btn-success me-1" title="Convert to Prospect" onclick="return confirm('Promote this lead to a Prospect?')">
+                <a href="{{ url_for('leads.convert_lead', lead_id=lead._id) }}" class="btn btn-sm btn-success me-1" title="Convert to Prospect" onclick="return confirm('Promote this lead to a Prospect?')">
                     <i class="bi bi-arrow-right-circle"></i> Convert
                 </a>
-                <a href="{{ url_for('delete_lead', lead_id=lead._id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this lead?')">
+                <a href="{{ url_for('leads.delete_lead', lead_id=lead._id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this lead?')">
                     <i class="bi bi-trash"></i>
                 </a>
             </td>
@@ -62,7 +62,7 @@
     </table>
 </div></div></div>
 <div class="modal fade" id="addLeadModal"><div class="modal-dialog"><div class="modal-content">
-    <form action="{{ url_for('leads') }}" method="POST">
+    <form action="{{ url_for('leads.leads') }}" method="POST">
         <div class="modal-header"><h5 class="modal-title">New Lead</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
         <div class="modal-body">
             <input type="text" name="name" class="form-control mb-3" placeholder="Full Name" required>
