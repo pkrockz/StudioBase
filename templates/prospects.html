@@ -30,7 +30,7 @@
                             <div class="text-muted small">{{ p.company }}</div>
                         </td>
                         <td>
-                            <form action="{{ url_for('update_prospect_stage', prospect_id=p._id) }}" method="POST">
+                            <form action="{{ url_for('prospects.update_prospect_stage', prospect_id=p._id) }}" method="POST">
                                 <select name="stage" class="form-select form-select-sm" onchange="this.form.submit()"
                                         style="width: 150px; font-size: 0.85rem; font-weight: 500;
                                         {% if p.stage == 'Negotiating' %}
@@ -52,7 +52,7 @@
                             </form>
                         </td>
                         <td>
-                            <form action="{{ url_for('update_prospect_value', prospect_id=p._id) }}" method="POST">
+                            <form action="{{ url_for('prospects.update_prospect_value', prospect_id=p._id) }}" method="POST">
                                 <div class="input-group input-group-sm" style="min-width: 100px;">
                                     <span class="input-group-text bg-light text-muted border-0">$</span>
                                     <input type="number" name="value" value="{{ p.value }}" 
@@ -72,14 +72,14 @@
                             </div>
                         </td>
                         <td>
-                            <a href="{{ url_for('convert_prospect', prospect_id=p._id) }}" 
+                            <a href="{{ url_for('prospects.convert_prospect', prospect_id=p._id) }}" 
                                class="btn btn-sm btn-success me-1" 
                                title="Mark as Won"
                                onclick="return confirm('Mark this deal as WON? This will create a new Client.')">
                                 <i class="bi bi-trophy-fill"></i> Win
                             </a>
                             
-                            <a href="{{ url_for('delete_prospect', prospect_id=p._id) }}" 
+                            <a href="{{ url_for('prospects.delete_prospect', prospect_id=p._id) }}" 
                                class="btn btn-sm btn-outline-danger"
                                onclick="return confirm('Delete this prospect?')">
                                 <i class="bi bi-trash"></i>
@@ -103,7 +103,7 @@
 <div class="modal fade" id="addProspectModal">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form action="{{ url_for('prospects') }}" method="POST">
+            <form action="{{ url_for('prospects.prospects') }}" method="POST">
                 <div class="modal-header">
                     <h5 class="modal-title">New Prospect</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
