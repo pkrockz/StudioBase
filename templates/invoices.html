@@ -17,11 +17,11 @@
                 <td>${{ inv.amount }}</td>
                 <td><span class="badge {% if inv.status == 'Paid' %}bg-success{% else %}bg-danger{% endif %}">{{ inv.status }}</span></td>
                 <td>
-                    <a href="{{ url_for('view_invoice', invoice_id=inv._id) }}" target="_blank" class="btn btn-sm btn-outline-primary">View</a>
+                    <a href="{{ url_for('invoices.view_invoice', invoice_id=inv._id) }}" target="_blank" class="btn btn-sm btn-outline-primary">View</a>
                     {% if inv.status != 'Paid' %}
-                    <a href="{{ url_for('mark_invoice_paid', invoice_id=inv._id) }}" class="btn btn-sm btn-success">Pay</a>
+                    <a href="{{ url_for('invoices.mark_invoice_paid', invoice_id=inv._id) }}" class="btn btn-sm btn-success">Pay</a>
                     {% endif %}
-                    <a href="{{ url_for('delete_invoice', invoice_id=inv._id) }}" class="btn btn-sm btn-outline-danger">Del</a>
+                    <a href="{{ url_for('invoices.delete_invoice', invoice_id=inv._id) }}" class="btn btn-sm btn-outline-danger">Del</a>
                 </td>
             </tr>
             {% else %}<tr><td colspan="6" class="text-center py-4">No invoices.</td></tr>{% endfor %}
@@ -30,7 +30,7 @@
 </div></div></div>
 
 <div class="modal fade" id="addInvoiceModal"><div class="modal-dialog"><div class="modal-content">
-    <form action="{{ url_for('invoices') }}" method="POST">
+    <form action="{{ url_for('invoices.invoices') }}" method="POST">
         <div class="modal-header"><h5 class="modal-title">New Invoice</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
         <div class="modal-body">
             <label class="form-label small text-muted">Client</label>
