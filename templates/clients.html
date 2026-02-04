@@ -43,12 +43,17 @@
                         </td>
                         <td>
                             <div class="btn-group">
+                                <a href="{{ url_for('projects.client_projects', client_id=client._id) }}"
+                                    class="btn btn-sm btn-outline-primary"
+                                    title="View Projects">
+                                        <i class="bi bi-kanban"></i>
+                                </a>
                                 <a href="{{ url_for('clients.delete_client', client_id=client._id) }}"
                                    class="btn btn-sm btn-outline-danger"
                                    onclick="return confirm('WARNING: This will delete the Client, and ALL their Projects, Tasks, and Invoices. Continue?')"
                                    title="Delete Client">
                                     <i class="bi bi-trash"></i>
-                                </a>
+                                </a>                                
                             </div>
                         </td>
                     </tr>

@@ -3,7 +3,8 @@
 <div class="container-fluid">
     <div class="row mb-4"><div class="col-md-12">
         <nav aria-label="breadcrumb"><ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('projects') }}">Projects</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('projects.client_projects', client_id=project.client_id) }}">Projects</a>
+</li>
             <li class="breadcrumb-item active">{{ project.title }}</li>
         </ol></nav>
         
@@ -14,7 +15,7 @@
             </div>
             <div>
                 {% if project.status != 'Completed' %}
-                <a href="{{ url_for('complete_project', project_id=project._id) }}" 
+                <a href="{{ url_for('projects.complete_project', project_id=project._id) }}" 
                    class="btn btn-success btn-sm me-2"
                    onclick="return confirm('Mark project as Completed and generate Invoice?')">
                     <i class="bi bi-check2-all"></i> Complete & Invoice
@@ -37,7 +38,7 @@
                     {% for task in tasks %}
                     <tr class="{% if task.status == 'Done' %}table-light text-muted{% endif %}">
                         <td>
-                            <a href="{{ url_for('toggle_task', task_id=task._id) }}" class="text-decoration-none">
+                            <a href="{{ url_for('projects.toggle_task', task_id=task._id) }}" class="text-decoration-none">
                                 {% if task.status == 'Done' %}
                                 <i class="bi bi-check-circle-fill text-success fs-5"></i>
                                 {% else %}
@@ -57,17 +58,16 @@
                             <button class="btn btn-sm btn-outline-secondary border-0" data-bs-toggle="modal" data-bs-target="#editTaskModal{{ task._id }}">
                                 <i class="bi bi-pencil"></i>
                             </button>
-                            <a href="{{ url_for('delete_task', task_id=task._id) }}" class="btn btn-sm btn-outline-danger border-0" onclick="return confirm('Delete this task?')">
+                            <a href="{{ url_for('projects.delete_task', task_id=task._id) }}" class="btn btn-sm btn-outline-danger border-0" onclick="return confirm('Delete this task?')">
                                 <i class="bi bi-trash"></i>
                             </a>
 
                             <div class="modal fade" id="editTaskModal{{ task._id }}" tabindex="-1">
                                 <div class="modal-dialog">
-                                    <form action="{{ url_for('edit_task', task_id=task._id) }}" method="POST">
+                                    <form action="{{ url_for('projects.edit_task', task_id=task._id) }}" method="POST">
                                         <div class="modal-content">
                                             <div class="modal-header"><h6 class="modal-title">Edit Task</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
                                             <div class="modal-body text-start">
-                                                <input type="hidden" name="project_id" value="{{ project._id }}">
                                                 <div class="mb-3">
                                                     <label class="form-label small">Description</label>
                                                     <input type="text" name="description" class="form-control" value="{{ task.description }}" required>
@@ -96,7 +96,7 @@
 <div class="modal fade" id="addTaskModal">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form action="{{ url_for('add_task', project_id=project._id) }}" method="POST">
+            <form action="{{ url_for('projects.add_task', project_id=project._id) }}" method="POST">
                 <div class="modal-header"><h5 class="modal-title">New Task</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
                 <div class="modal-body">
                     <input type="text" name="description" class="form-control mb-3" placeholder="Task Description" required>
