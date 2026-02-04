@@ -34,18 +34,17 @@
                             ${{ client.contract_value | default(0) }}
                         </td>
                         <td>
-                            <span class="badge bg-light text-dark border">{{ client.billing_terms }}</span>
+                            <span class="badge bg-light text-dark border">
+                                {{ client.billing_terms }}
+                            </span>
                         </td>
                         <td>
                             <span class="badge bg-success">Active</span>
                         </td>
                         <td>
                             <div class="btn-group">
-                                <a href="{{ url_for('projects') }}" class="btn btn-sm btn-outline-primary" title="View Projects">
-                                    <i class="bi bi-kanban"></i>
-                                </a>
-                                <a href="{{ url_for('delete_client', client_id=client._id) }}" 
-                                   class="btn btn-sm btn-outline-danger" 
+                                <a href="{{ url_for('clients.delete_client', client_id=client._id) }}"
+                                   class="btn btn-sm btn-outline-danger"
                                    onclick="return confirm('WARNING: This will delete the Client, and ALL their Projects, Tasks, and Invoices. Continue?')"
                                    title="Delete Client">
                                     <i class="bi bi-trash"></i>
@@ -69,7 +68,7 @@
 <div class="modal fade" id="addClientModal">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form action="{{ url_for('clients') }}" method="POST">
+            <form action="{{ url_for('clients.clients') }}" method="POST">
                 <div class="modal-header">
                     <h5 class="modal-title">Add Manual Client</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -78,12 +77,12 @@
                     <div class="alert alert-info small">
                         Tip: It's better to convert a Prospect to a Client to preserve history.
                     </div>
-                    
+
                     <label class="form-label small text-muted">Client Details</label>
                     <input type="text" name="name" class="form-control mb-3" placeholder="Name" required>
                     <input type="text" name="company" class="form-control mb-3" placeholder="Company" required>
                     <input type="email" name="email" class="form-control mb-3" placeholder="Email">
-                    
+
                     <label class="form-label small text-muted">Contract Specs</label>
                     <div class="input-group mb-3">
                         <span class="input-group-text">$</span>

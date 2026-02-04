@@ -77,67 +77,8 @@ def create_app():
 
     # --- CLIENTS ROUTES ---
 
-    @app.route('/clients', methods=['GET', 'POST'])
-    def clients():
-        if 'user_id' not in session: return redirect(url_for('auth.index'))
-        
-        if request.method == 'POST':
-            mongo.db.clients.insert_one({
-                "user_id": session['user_id'],
-                "name": request.form.get('name'),
-                "company": request.form.get('company'),
-                "email": request.form.get('email'),
-                "contract_value": float(request.form.get('contract_value', 0)),
-                "billing_terms": request.form.get('billing_terms'),
-                "status": "Active",
-                "created_at": datetime.utcnow()
-            })
-            return redirect(url_for('clients'))
-
-        user_clients = mongo.db.clients.find({"user_id": session['user_id']})
-        return render_template('clients.html', clients=user_clients)
-
-    @app.route('/clients/delete/<client_id>')
-    def delete_client(client_id):
-        if 'user_id' not in session: return redirect(url_for('auth.index'))
-        
-        # 1. Identify the Client
-        client = mongo.db.clients.find_one({"_id": ObjectId(client_id), "user_id": session['user_id']})
-        
-        if client:
-            # 2. Delete all Invoices linked to this Client Name
-            # (Since invoices currently link by name string)
-            mongo.db.invoices.delete_many({
-                "user_id": session['user_id'], 
-                "client_name": client['name']
-            })
-
-            # 3. Find all Projects linked to this Client ID
-            projects = mongo.db.projects.find({
-                "user_id": session['user_id'], 
-                "client_id": ObjectId(client_id)
-            })
-            
-            # 4. Delete Tasks for each Project
-            for p in projects:
-                mongo.db.tasks.delete_many({
-                    "user_id": session['user_id'],
-                    "project_id": p['_id']
-                })
-                
-            # 5. Delete the Projects themselves
-            mongo.db.projects.delete_many({
-                "user_id": session['user_id'], 
-                "client_id": ObjectId(client_id)
-            })
-
-            # 6. Finally, Delete the Client
-            mongo.db.clients.delete_one({
-                "_id": ObjectId(client_id), 
-                "user_id": session['user_id']
-            })
-
-        return redirect(url_for('clients'))
+    from clients import clients_bp
+    app.register_blueprint(clients_bp)
 
     # --- PROJECTS & AI ROUTES ---
 
