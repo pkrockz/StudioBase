@@ -1,13 +1,10 @@
 import os
-import json
 from datetime import datetime
-from flask import Flask, render_template, session, redirect, url_for, request
+from flask import Flask
 from dotenv import load_dotenv
-from bson.objectid import ObjectId
 import google.generativeai as genai
 
-# Load environment variables
-load_dotenv() 
+load_dotenv()
 
 from config import Config
 from extensions import mongo, oauth
