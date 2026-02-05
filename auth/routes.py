@@ -5,32 +5,27 @@ from datetime import datetime
 from extensions import mongo, oauth
 from . import auth_bp
 
-# OAuth clients will be registered in app factory
-github = oauth.github
-google = oauth.google
-
-
 @auth_bp.route("/")
 def index():
     if "user_id" in session:
         return redirect(url_for("dashboard.dashboard"))
     return render_template("login.html")
 
-
 @auth_bp.route("/login/github")
 def login_github():
+    github = oauth.create_client("github")
     redirect_uri = url_for("auth.authorize_github", _external=True)
     return github.authorize_redirect(redirect_uri)
 
-
 @auth_bp.route("/login/google")
 def login_google():
+    google = oauth.create_client("google")
     redirect_uri = url_for("auth.authorize_google", _external=True)
     return google.authorize_redirect(redirect_uri)
 
-
 @auth_bp.route("/authorize/github")
 def authorize_github():
+    github = oauth.create_client("github")
     token = github.authorize_access_token()
     user_info = github.get("user", token=token).json()
 
@@ -43,9 +38,9 @@ def authorize_github():
     }
     return handle_login(user_data)
 
-
 @auth_bp.route("/authorize/google")
 def authorize_google():
+    google = oauth.create_client("google")
     token = google.authorize_access_token()
     user_info = token.get("userinfo")
 
@@ -57,7 +52,6 @@ def authorize_google():
         "avatar_url": user_info["picture"],
     }
     return handle_login(user_data)
-
 
 def handle_login(data):
     users = mongo.db.users
@@ -83,7 +77,6 @@ def handle_login(data):
     session["avatar"] = data["avatar_url"]
 
     return redirect(url_for("dashboard.dashboard"))
-
 
 @auth_bp.route("/logout")
 def logout():

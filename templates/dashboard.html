@@ -46,7 +46,7 @@
                     {% for lead in urgent_leads %}
                     <li class="list-group-item d-flex justify-content-between">
                         <div><strong>{{ lead.name }}</strong> <small class="text-muted">({{ lead.company }})</small></div>
-                        <a href="{{ url_for('leads') }}" class="btn btn-sm btn-outline-primary">View</a>
+                        <a href="{{ url_for('leads.leads') }}" class="btn btn-sm btn-outline-primary">View</a>
                     </li>
                     {% else %}
                     <li class="list-group-item text-center text-muted">All clear!</li>

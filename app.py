@@ -12,7 +12,6 @@ load_dotenv()
 from config import Config
 from extensions import mongo, oauth
 
-
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
@@ -89,74 +88,6 @@ def create_app():
 
     from invoices import invoices_bp
     app.register_blueprint(invoices_bp)
-
-    # @app.route('/invoices', methods=['GET', 'POST'])
-    # def invoices():
-    #     # ... [Keep existing invoice creation logic] ...
-    #     if 'user_id' not in session: return redirect(url_for('auth.index'))
-    #     if request.method == 'POST':
-    #         inv_number = f"INV-{datetime.utcnow().strftime('%Y%m%d')}-{str(ObjectId())[-4:]}"
-    #         mongo.db.invoices.insert_one({
-    #             "user_id": session['user_id'],
-    #             "invoice_number": inv_number,
-    #             "client_name": request.form.get('client_name'),
-    #             "project_title": request.form.get('project_title'),
-    #             "amount": float(request.form.get('amount')),
-    #             "due_date": request.form.get('due_date'),
-    #             "status": "Unpaid",
-    #             "created_at": datetime.utcnow()
-    #         })
-    #         return redirect(url_for('invoices'))
-
-    #     user_invoices = mongo.db.invoices.find({"user_id": session['user_id']})
-    #     clients = mongo.db.clients.find({"user_id": session['user_id']}) 
-    #     projects = mongo.db.projects.find({"user_id": session['user_id']})
-    #     return render_template('invoices.html', invoices=user_invoices, clients=clients, projects=projects)
-
-    # @app.route('/invoice/<invoice_id>/pay')
-    # def mark_invoice_paid(invoice_id):
-    #     if 'user_id' not in session: return redirect(url_for('auth.index'))
-        
-    #     # 1. Mark this invoice as Paid
-    #     mongo.db.invoices.update_one(
-    #         {"_id": ObjectId(invoice_id)}, 
-    #         {"$set": {"status": "Paid", "paid_date": datetime.utcnow()}}
-    #     )
-        
-    #     # 2. AUTO-DELETE LOGIC
-    #     # Retrieve the invoice to find out who the client is
-    #     invoice = mongo.db.invoices.find_one({"_id": ObjectId(invoice_id)})
-    #     if invoice:
-    #         client_name = invoice.get('client_name')
-            
-    #         # Check if this client has ANY remaining "Unpaid" invoices
-    #         unpaid_count = mongo.db.invoices.count_documents({
-    #             "user_id": session['user_id'],
-    #             "client_name": client_name,
-    #             "status": "Unpaid"
-    #         })
-            
-    #         # If no unpaid invoices remain, delete the client from the active list
-    #         if unpaid_count == 0:
-    #             mongo.db.clients.delete_one({
-    #                 "user_id": session['user_id'], 
-    #                 "name": client_name
-    #             })
-                
-    #     return redirect(url_for('invoices'))
-
-    # @app.route('/invoice/<invoice_id>/view')
-    # def view_invoice(invoice_id):
-    #     if 'user_id' not in session: return redirect(url_for('auth.index'))
-    #     invoice = mongo.db.invoices.find_one({"_id": ObjectId(invoice_id)})
-    #     user = mongo.db.users.find_one({"_id": ObjectId(session['user_id'])})
-    #     return render_template('invoice_view.html', invoice=invoice, user=user)
-
-    # @app.route('/invoices/delete/<invoice_id>')
-    # def delete_invoice(invoice_id):
-    #     if 'user_id' not in session: return redirect(url_for('auth.index'))
-    #     mongo.db.invoices.delete_one({"_id": ObjectId(invoice_id), "user_id": session['user_id']})
-    #     return redirect(url_for('invoices'))
     
     return app
 

@@ -5,3 +5,4 @@ Authlib
 requests
 python-dotenv
 google-generativeai
+dnspython
