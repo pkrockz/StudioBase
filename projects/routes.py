@@ -4,7 +4,6 @@ from datetime import datetime
 import json
 import google.generativeai as genai
 
-
 from extensions import mongo
 from . import projects_bp
 
@@ -25,26 +24,29 @@ def client_projects(client_id):
         deadline_raw = request.form.get("deadline")
         deadline = datetime.fromisoformat(deadline_raw) if deadline_raw else None
 
-        use_ai = request.form.get("use_ai") == "on"
+        description = request.form.get("description", "").strip()
+        use_ai = request.form.get("use_ai") == "on" and bool(description)
 
         project_id = mongo.db.projects.insert_one({
             "user_id": session["user_id"],
             "client_id": ObjectId(client_id),
             "client_name": client["name"],
             "title": request.form.get("title"),
-            "description": request.form.get("description"),
+            "description": description if description else None,
             "status": "Planning",
             "deadline": deadline,
+            "ai_generated": False,
             "created_at": datetime.utcnow()
         }).inserted_id
 
-        if use_ai:
+        project = mongo.db.projects.find_one({"_id": project_id})
+        if use_ai and description and not project.get("ai_generated"):
             generate_tasks(
                 project_id=project_id,
-                description=request.form.get("description"),
+                description=description,
                 user_id=session["user_id"]
             )
-
+        mongo.db.projects.update_one({"_id": project_id},{"$set": {"ai_generated": True}})   
         return redirect(url_for("projects.project_detail", project_id=project_id))
 
 
@@ -102,6 +104,14 @@ def add_task(project_id):
     if "user_id" not in session:
         return redirect(url_for("auth.index"))
 
+    project = mongo.db.projects.find_one({
+        "_id": ObjectId(project_id),
+        "user_id": session["user_id"]
+    })
+
+    if not project or project["status"] == "Completed":
+        return redirect(url_for("projects.project_detail", project_id=project_id))
+
     mongo.db.tasks.insert_one({
         "user_id": session["user_id"],
         "project_id": ObjectId(project_id),
@@ -118,13 +128,13 @@ def toggle_task(task_id):
     if "user_id" not in session:
         return redirect(url_for("auth.index"))
 
-    task = mongo.db.tasks.find_one({
-        "_id": ObjectId(task_id),
-        "user_id": session["user_id"]
-    })
-
+    task = mongo.db.tasks.find_one({"_id": ObjectId(task_id),"user_id": session["user_id"]})
     if not task:
         return redirect(url_for("dashboard.dashboard"))
+    
+    project = mongo.db.projects.find_one({"_id": task["project_id"]})
+    if project["status"] == "Completed":
+        return redirect(url_for("projects.project_detail", project_id=task["project_id"]))
 
     new_status = "Done" if task["status"] == "Pending" else "Pending"
 
@@ -143,13 +153,13 @@ def edit_task(task_id):
     if "user_id" not in session:
         return redirect(url_for("auth.index"))
 
-    task = mongo.db.tasks.find_one({
-        "_id": ObjectId(task_id),
-        "user_id": session["user_id"]
-    })
-
+    task = mongo.db.tasks.find_one({"_id": ObjectId(task_id),"user_id": session["user_id"]})
     if not task:
         return redirect(url_for("dashboard.dashboard"))
+    
+    project = mongo.db.projects.find_one({"_id": task["project_id"]})
+    if project["status"] == "Completed":
+        return redirect(url_for("projects.project_detail", project_id=task["project_id"]))
 
     mongo.db.tasks.update_one(
         {"_id": task["_id"]},
@@ -169,13 +179,15 @@ def delete_task(task_id):
     if "user_id" not in session:
         return redirect(url_for("auth.index"))
 
-    task = mongo.db.tasks.find_one({
-        "_id": ObjectId(task_id),
-        "user_id": session["user_id"]
-    })
+    task = mongo.db.tasks.find_one({"_id": ObjectId(task_id),"user_id": session["user_id"]})
+    if not task:
+        return redirect(url_for("dashboard.dashboard"))
+    
+    project = mongo.db.projects.find_one({"_id": task["project_id"]})
+    if project["status"] == "Completed":
+        return redirect(url_for("projects.project_detail", project_id=task["project_id"]))
 
-    if task:
-        mongo.db.tasks.delete_one({"_id": task["_id"]})
+    mongo.db.tasks.delete_one({"_id": task["_id"]})
 
     return redirect(url_for(
         "projects.project_detail",
@@ -234,6 +246,8 @@ def delete_project(project_id):
     ))
 
 def generate_tasks(project_id, description, user_id):
+    if not description:
+        return
     model = genai.GenerativeModel("gemini-2.5-flash")
 
     prompt = f"""
@@ -275,3 +289,15 @@ def generate_tasks(project_id, description, user_id):
 
     except Exception as e:
         print("AI ERROR:", e)
+
+@projects_bp.route("/projects/<project_id>/undo")
+def undo_project(project_id):
+    if "user_id" not in session:
+        return redirect(url_for("auth.index"))
+
+    mongo.db.projects.update_one(
+        {"_id": ObjectId(project_id), "user_id": session["user_id"]},
+        {"$set": {"status": "Planning"}}
+    )
+
+    return redirect(url_for("projects.project_detail", project_id=project_id))

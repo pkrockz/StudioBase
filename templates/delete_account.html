@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-sm border-danger">
+        <div class="card-body text-center">
+            <h4 class="text-danger mb-3">Delete Account</h4>
+            <p class="text-muted">
+                This will permanently delete your account and all associated data:
+                <br>clients, projects, tasks, and invoices.
+            </p>
+            <p class="fw-bold text-danger">
+                This action cannot be undone.
+            </p>
+
+            <form method="POST" action="{{ url_for('auth.delete_account') }}">
+                <button class="btn btn-danger me-2">
+                    Delete my account permanently
+                </button>
+                <a href="{{ url_for('dashboard.dashboard') }}" class="btn btn-secondary">
+                    Cancel
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

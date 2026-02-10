@@ -18,7 +18,6 @@ def clients():
             "company": request.form.get("company"),
             "email": request.form.get("email"),
             "contract_value": float(request.form.get("contract_value", 0)),
-            "billing_terms": request.form.get("billing_terms"),
             "status": "Active",
             "created_at": datetime.utcnow()
         })

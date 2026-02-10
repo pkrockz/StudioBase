@@ -22,78 +22,76 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for p in prospects %}
-                    {% if p.stage != 'Won' %}
-                    <tr>
-                        <td>
-                            <div class="fw-bold">{{ p.name }}</div>
-                            <div class="text-muted small">{{ p.company }}</div>
-                        </td>
-                        <td>
-                            <form action="{{ url_for('prospects.update_prospect_stage', prospect_id=p._id) }}" method="POST">
-                                <select name="stage" class="form-select form-select-sm" onchange="this.form.submit()"
-                                        style="width: 150px; font-size: 0.85rem; font-weight: 500;
-                                        {% if p.stage == 'Negotiating' %}
-                                            background-color: #fff3cd; color: #664d03; border-color: #ffecb5;
-                                        {% elif p.stage == 'Verbal Agreement' %}
-                                            background-color: #d1e7dd; color: #0f5132; border-color: #badbcc;
-                                        {% elif p.stage == 'Closed Lost' %}
-                                            background-color: #f8d7da; color: #842029; border-color: #f5c2c7;
-                                        {% else %}
-                                            background-color: #f8f9fa; color: #212529; border-color: #ced4da;
-                                        {% endif %}">
-                                    
-                                    <option value="Discovery" {% if p.stage == 'Discovery' %}selected{% endif %}>🔍 Discovery</option>
-                                    <option value="Proposal Sent" {% if p.stage == 'Proposal Sent' %}selected{% endif %}>📄 Proposal Sent</option>
-                                    <option value="Negotiating" {% if p.stage == 'Negotiating' %}selected{% endif %}>💬 Negotiating</option>
-                                    <option value="Verbal Agreement" {% if p.stage == 'Verbal Agreement' %}selected{% endif %}>🤝 Verbal Agmt</option>
-                                    <option value="Closed Lost" {% if p.stage == 'Closed Lost' %}selected{% endif %}>❌ Closed Lost</option>
-                                </select>
-                            </form>
-                        </td>
-                        <td>
-                            <form action="{{ url_for('prospects.update_prospect_value', prospect_id=p._id) }}" method="POST">
-                                <div class="input-group input-group-sm" style="min-width: 100px;">
-                                    <span class="input-group-text bg-light text-muted border-0">$</span>
-                                    <input type="number" name="value" value="{{ p.value }}" 
-                                        class="form-control border-0 bg-transparent fw-bold" 
-                                        onchange="this.form.submit()"
-                                        style="box-shadow: none;">
+                    {% set active_prospects = prospects | selectattr("stage", "ne", "Won") | list %}
+
+                    {% if active_prospects %}
+                        {% for p in active_prospects %}
+                        <tr>
+                            <td>
+                                <div class="fw-bold">{{ p.name }}</div>
+                                <div class="text-muted small">{{ p.company }}</div>
+                            </td>
+
+                            <td>
+                                <form action="{{ url_for('prospects.update_prospect_stage', prospect_id=p._id) }}" method="POST">
+                                    <select name="stage"
+                                            class="form-select form-select-sm"
+                                            onchange="this.form.submit()"
+                                            style="width:150px;font-size:0.85rem;font-weight:500;">
+                                        <option value="Discovery" {{ "selected" if p.stage=="Discovery" }}>Discovery</option>
+                                        <option value="Proposal Sent" {{ "selected" if p.stage=="Proposal Sent" }}>Proposal Sent</option>
+                                        <option value="Negotiating" {{ "selected" if p.stage=="Negotiating" }}>Negotiating</option>
+                                        <option value="Verbal Agreement" {{ "selected" if p.stage=="Verbal Agreement" }}>Verbal Agmt</option>
+                                        <option value="Closed Lost" {{ "selected" if p.stage=="Closed Lost" }}>Closed Lost</option>
+                                    </select>
+                                </form>
+                            </td>
+
+                            <td>
+                                <form action="{{ url_for('prospects.update_prospect_value', prospect_id=p._id) }}" method="POST">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text">₹</span>
+                                        <input type="number"
+                                            name="value"
+                                            value="{{ p.value }}"
+                                            class="form-control"
+                                            onchange="this.form.submit()">
+                                    </div>
+                                </form>
+                            </td>
+
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="progress flex-grow-1" style="height:6px;">
+                                        <div class="progress-bar"
+                                            style="width: {{ p.probability }}%"></div>
+                                    </div>
+                                    <span class="ms-2 small">{{ p.probability }}%</span>
                                 </div>
-                            </form>
-                        </td>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <div class="progress flex-grow-1" style="height: 6px;">
-                                    <div class="progress-bar {% if p.probability > 70 %}bg-success{% else %}bg-primary{% endif %}" 
-                                         role="progressbar" style="width: {{ p.probability }}%"></div>
-                                </div>
-                                <span class="ms-2 small">{{ p.probability }}%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <a href="{{ url_for('prospects.convert_prospect', prospect_id=p._id) }}" 
-                               class="btn btn-sm btn-success me-1" 
-                               title="Mark as Won"
-                               onclick="return confirm('Mark this deal as WON? This will create a new Client.')">
-                                <i class="bi bi-trophy-fill"></i> Win
-                            </a>
-                            
-                            <a href="{{ url_for('prospects.delete_prospect', prospect_id=p._id) }}" 
-                               class="btn btn-sm btn-outline-danger"
-                               onclick="return confirm('Delete this prospect?')">
-                                <i class="bi bi-trash"></i>
-                            </a>
-                        </td>
-                    </tr>
-                    {% endif %}
+                            </td>
+
+                            <td>
+                                <a href="{{ url_for('prospects.convert_prospect', prospect_id=p._id) }}"
+                                class="btn btn-sm btn-success me-1"
+                                onclick="return confirm('Mark this deal as WON?')">
+                                    <i class="bi bi-trophy-fill"></i> Win
+                                </a>
+
+                                <a href="{{ url_for('prospects.delete_prospect', prospect_id=p._id) }}"
+                                class="btn btn-sm btn-outline-danger"
+                                onclick="return confirm('Delete this prospect?')">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
                     {% else %}
-                    <tr>
-                        <td colspan="5" class="text-center py-4 text-muted">
-                            No active prospects. Go to Leads and convert someone!
-                        </td>
-                    </tr>
-                    {% endfor %}
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">
+                                No active prospects. Go to Leads and convert someone!
+                            </td>
+                        </tr>
+                    {% endif %}
                 </tbody>
             </table>
         </div>
@@ -112,7 +110,7 @@
                     <input type="text" name="name" class="form-control mb-3" placeholder="Name" required>
                     <input type="text" name="company" class="form-control mb-3" placeholder="Company" required>
                     <input type="email" name="email" class="form-control mb-3" placeholder="Email">
-                    <input type="number" name="value" class="form-control mb-3" placeholder="Estimated Value ($)">
+                    <input type="number" name="value" class="form-control mb-3" placeholder="Estimated Value (₹)">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>

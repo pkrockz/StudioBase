@@ -8,6 +8,13 @@ from . import invoices_bp
 def invoices():
     if "user_id" not in session:
         return redirect(url_for("auth.index"))
+    
+    profile = mongo.db.business_profile.find_one({
+    "user_id": session["user_id"]
+    })
+
+    if not profile:
+        return redirect(url_for("business.business_profile"))
 
     if request.method == "POST":
         invoice_number = f"INV-{datetime.utcnow().strftime('%Y%m%d')}-{str(ObjectId())[-4:]}"
@@ -18,6 +25,7 @@ def invoices():
             "project_title": request.form.get("project_title"),
             "amount": float(request.form.get("amount", 0)),
             "due_date": request.form.get("due_date"),
+            "payment_mode": request.form.get("payment_mode"),
             "status": "Unpaid",
             "created_at": datetime.utcnow()
         })
@@ -56,10 +64,15 @@ def view_invoice(invoice_id):
         "_id": ObjectId(session["user_id"])
     })
 
+    business = mongo.db.business_profile.find_one({
+        "user_id": session["user_id"]
+    })
+    
     return render_template(
         "invoice_view.html",
         invoice=invoice,
-        user=user
+        user=user,
+        business=business
     )
 
 @invoices_bp.route("/invoices/<invoice_id>/pay")

@@ -4,7 +4,8 @@ from flask import Flask
 from dotenv import load_dotenv
 import google.generativeai as genai
 
-load_dotenv()
+if os.getenv("FLASK_ENV") != "production":
+    load_dotenv()
 
 from config import Config
 from extensions import mongo, oauth
@@ -13,15 +14,9 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    # Initialize extensions
-    mongo.init_app(app)
-    oauth.init_app(app)
+    # ---- TEMPLATE FILTERS (REGISTER FIRST) ----
 
-    # AI setup
-    genai.configure(api_key=app.config.get("GEMINI_API_KEY"))
-
-    # --- Custom Filters (Fixes Date Crashes) ---
-    @app.template_filter('date_format')
+    @app.template_filter("date_format")
     def date_format(value, format='%Y-%m-%d'):
         if value is None:
             return ""
@@ -31,10 +26,45 @@ def create_app():
             return value.strftime(format)
         return value
 
-    # --- OAuth Setup ---
-    global github, google
+    @app.template_filter("currency")
+    def currency(amount):
+        try:
+            amount = float(amount)
+        except (TypeError, ValueError):
+            return ""
+        return f"₹{amount:,.2f}"
 
-    github = oauth.register(
+    @app.template_filter("gst")
+    def gst(amount):
+        try:
+            amount = float(amount)
+        except (TypeError, ValueError):
+            return {}
+
+        cgst_rate = app.config.get("CGST_RATE", 0.09)
+        sgst_rate = app.config.get("SGST_RATE", 0.09)
+
+        cgst = amount * cgst_rate
+        sgst = amount * sgst_rate
+
+        return {
+            "base": amount,
+            "cgst": cgst,
+            "sgst": sgst,
+            "total": amount + cgst + sgst
+        }
+
+    # ---- EXTENSIONS ----
+    mongo.init_app(app)
+    oauth.init_app(app)
+
+    # AI setup
+    genai.configure(api_key=app.config.get("GEMINI_API_KEY"))
+
+    
+
+    # --- OAuth Setup ---
+    oauth.register(
         name='github',
         client_id=app.config.get("GITHUB_CLIENT_ID"),
         client_secret=app.config.get("GITHUB_CLIENT_SECRET"),
@@ -44,7 +74,7 @@ def create_app():
         client_kwargs={'scope': 'user:email'},
     )
 
-    google = oauth.register(
+    oauth.register(
         name='google',
         client_id=app.config.get("GOOGLE_CLIENT_ID"),
         client_secret=app.config.get("GOOGLE_CLIENT_SECRET"),
@@ -85,7 +115,11 @@ def create_app():
 
     from invoices import invoices_bp
     app.register_blueprint(invoices_bp)
-    
+
+    # --- BUSINESS INFO ---
+    from business import business_bp
+    app.register_blueprint(business_bp)
+
     return app
 
 app = create_app()
