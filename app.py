@@ -52,16 +52,14 @@ def create_app():
             "total": amount + cgst + sgst
         }
 
-    # ---- EXTENSIONS ----
+    # EXTENSIONS 
     mongo.init_app(app)
     oauth.init_app(app)
 
     # AI setup
     genai.configure(api_key=app.config.get("GEMINI_API_KEY"))
 
-    
-
-    # --- OAuth Setup ---
+    # OAuth Setup 
     oauth.register(
         name='github',
         client_id=app.config.get("GITHUB_CLIENT_ID"),
