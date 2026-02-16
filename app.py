@@ -14,8 +14,6 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    # ---- TEMPLATE FILTERS (REGISTER FIRST) ----
-
     @app.template_filter("date_format")
     def date_format(value, format='%Y-%m-%d'):
         if value is None:
